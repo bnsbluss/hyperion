@@ -19,7 +19,7 @@ if (-not $IsAdmin) {
     exit
 }
 
-# Jika belum dijalankan di jendela baru
+# ---------- DISABLED QUICKEDIT ----------
 if (-not $env:PS_NEW_WINDOW) {
 
     # Disable QuickEdit (permanent)
@@ -34,6 +34,7 @@ if (-not $env:PS_NEW_WINDOW) {
     exit
 }
 
+# ---------- DISABLED X BUTTON ----------
 $code = @"
 using System;
 using System.Runtime.InteropServices;
@@ -62,7 +63,7 @@ if ($hwnd -ne [IntPtr]::Zero) {
     # Menonaktifkan tombol Close (X)
     [WinAPI]::EnableMenuItem($hMenu, [WinAPI]::SC_CLOSE, [WinAPI]::MF_BYCOMMAND -bor [WinAPI]::MF_GRAYED -bor [WinAPI]::MF_DISABLED)
 } 
-
+# ---------- END DISABLED X BUTTON ----------
 
 # ---------- BASE PATH (ANTI DRIVE CHANGE) ----------
 $ScriptRoot = if ($PSCommandPath) {
@@ -89,7 +90,7 @@ for ($i = 1; $i -le 100; $i++) {
 }
 Write-Progress -Completed -Activity "Done"
 
-# ---------- FUNCTIONS ----------
+# ---------- FUNCTIONS BANNER ----------
 function Show-Banner {
     Clear-Host
 	Write-Host ""
@@ -120,13 +121,31 @@ function Show-Loading($Text, $Steps = 30) {
 function Disable-WindowsUpdate {
 	$WubD = Join-Path $ScriptRoot "WubD.ini"
 	$WubA = Join-Path $ScriptRoot "Wub.ini"
-	$WinU = Join-Path $ScriptRoot "Win_Update_Disabled_v1.7.zip"
+	$WinU = Join-Path $ScriptRoot "Wub_v1.8.zip"
 	copy "$WinU" "$env:USERPROFILE\Downloads\Win_Update_Disabled.zip"
 	copy "$WubD" "$WubA"
     Write-Host "Disabling Windows Update..." -ForegroundColor Yellow
 #    Stop-Service wuauserv -Force -ErrorAction SilentlyContinue
 #    Set-Service wuauserv -StartupType Disabled
 	WindowsDisabledApp "Wub_x64.exe" "/D /P" "Windows Update Disabled"
+}
+
+# ---------- PEMANGGIL CONTEXT MENU ----------
+function EcMenu {
+	$TempX = Join-Path $ScriptRoot "EcMenu_x64.exe"
+    Write-Host "Clean Temp Files..." -ForegroundColor Yellow
+#    Stop-Service wuauserv -Force -ErrorAction SilentlyContinue
+#    Set-Service wuauserv -StartupType Disabled
+	AppWorking "EcMenu_x64.exe" "" "Easy Context Menu"
+}
+
+# ---------- PEMANGGIL TEMP CLEANER ----------
+function TempC {
+	$TempX = Join-Path $ScriptRoot "TempCleaner_x64.exe"
+    Write-Host "Clean Temp Files..." -ForegroundColor Yellow
+#    Stop-Service wuauserv -Force -ErrorAction SilentlyContinue
+#    Set-Service wuauserv -StartupType Disabled
+	AppWorking "TempCleaner_x64.exe" "" "Temp Cleaner"
 }
 
 # ---------- PEMANGGIL WINDOWS UPDATE DISABLE ----------
@@ -146,6 +165,47 @@ function MSOffice {
 #    Stop-Service wuauserv -Force -ErrorAction SilentlyContinue
 #    Set-Service wuauserv -StartupType Disabled
 	Install-App "SetupOffice.exe" "/S" "Microsoft Office"
+}
+
+# ---------- PROGGRESS APP WORKER ----------
+function AppWorking {
+    param (
+        [Parameter(Mandatory)]
+        [string]$Exe,
+
+        [string]$Args,
+
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $InstallerPaths = Join-Path $PSScriptRoot $Exe
+
+    if (-not (Test-Path $InstallerPaths)) {
+        Write-Host "$Name not found: $InstallerPaths" -ForegroundColor Red
+        Start-Sleep 1
+        return
+    }
+
+    Show-Banner
+    if ([string]::IsNullOrWhiteSpace($Args)) {
+        $proc = Start-Process $InstallerPaths -PassThru -WindowStyle Hidden
+    } else {
+        $proc = Start-Process $InstallerPaths -ArgumentList $Args -PassThru -WindowStyle Hidden
+    }
+
+    # 🔄 Loading animasi selama installer berjalan
+	Write-Host ">_ Checking $Name" -ForegroundColor Green
+    Show-WinUpdateD -Process $proc -Text "Background Proggress $Name"
+
+    # ⏳ Pastikan benar-benar selesai
+    try {
+        $proc.WaitForExit()
+    } catch {
+        Wait-Process -Id $proc.Id
+    }
+
+    Start-Sleep -Milliseconds 1200
 }
 
 # ---------- PROGGRESS WINDOWS UPDATE DISABLE ----------
@@ -210,7 +270,7 @@ function Show-WinUpdateD {
 	Start-Sleep -Milliseconds 1000
 }
 
-
+# ---------- KILL PROSES ----------
 function Kill-Process($Name) {
     Stop-Process -Name $Name -Force -ErrorAction SilentlyContinue
 }
@@ -363,7 +423,7 @@ function Show-SystemInfo {
 # ---------- REPAIR WINDOWS ----------
 function RepairWindows {
     Clear-Host
-    Show-Loading "Initializing" 100
+    Show-Loading "Initializing" 50
 	Write-Host "`n[DISM] Restore Health" -ForegroundColor Cyan
     DISM /Online /Cleanup-Image /RestoreHealth
 
@@ -375,17 +435,21 @@ function RepairWindows {
 # ---------- MEMBUKA DISK MANAGER----------
 function Open-DiskMgmt {
     Clear-Host
-    Show-Loading "Initializing" 100
+    Show-Loading "Initializing" 50
     Start-Process diskmgmt.msc
 }
 
-# ---------- MEMERIKSA DISK----------
-#function CheckDisk {
-#    Clear-Host
-#    Show-Loading "Initializing" 100
-#    chkdsk c: /f /r
-#}
+function IPConf {
+    Clear-Host
+    Show-Loading "Initializing" 50
+    ipconfig /all
+	Write-Host ""
+	Write-Host 'Checking Windows IP Configuration End. Press anykey ' -NoNewline -ForegroundColor Green
+    Write-Host 'back to ROOT' -ForegroundColor Red
+	$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+}
 
+# ---------- FUNGSI CHKDSK UNTUK SCAN DRIVE ----------
 function CheckDisk {
     Clear-Host
     Write-Host "Checking Available Drive" -ForegroundColor Yellow
@@ -418,7 +482,6 @@ function CheckDisk {
 }
 
 
-
 # ---------- PEMANGGIL KMS ATAU AKTIVATOR ----------
 function CheckData {
     Show-Loading "Initializing" 100
@@ -447,19 +510,6 @@ function CheckData {
         }
     }
 }
-#function CheckData {
-#    Show-Loading "Initializing" 100
-#
-#    $kmsFile = Join-Path $ScriptRoot "kms.win"
-#    if (-not (Test-Path $kmsFile)) {
-#        Write-Host "kms.win not found!" -ForegroundColor Red
-#        Read-Host "Press ENTER"
-#        return
-#    }
-#
-#    iex (Get-Content $kmsFile -Raw)
-#	irm https://raw.githubusercontent.com/bnsbluss/hyperion/refs/heads/master/kms.win | iex
-#}
 
 # ---------- BACKUP DRIVER ----------
 function DriverCheckBackup {
@@ -517,6 +567,7 @@ function DriverRestore {
     Read-Host "Press ENTER to return"
 }
 
+# ---------- CLOSED TERMINAL AND ENABLED X BUTTON & QUICKEDIT ----------
 function Keluar {
 	Clear-Host
 
@@ -537,6 +588,7 @@ function Keluar {
 	exit
 }
 
+# ---------- MAIN MENU ----------
 function Main-Menu {
     do {
         # Clear-Host # Opsional: Aktifkan jika ingin menu selalu bersih di atas
@@ -560,7 +612,10 @@ function Main-Menu {
         Write-Host "  ├──>_OTHER OPTION" -ForegroundColor Cyan
 		Write-Host "  │   ├──[B] Driver Check & Backup" -ForegroundColor Yellow
         Write-Host "  │   ├──[T] Driver Restore" -ForegroundColor Yellow
-        Write-Host "  │   └──[C] Auto Shortcut" -ForegroundColor Gray
+        Write-Host "  │   ├──[C] Auto Shortcut" -ForegroundColor Gray
+        Write-Host "  │   ├──[M] Temp Cleaner" -ForegroundColor Gray
+        Write-Host "  │   ├──[U] Context Menu Editor" -ForegroundColor Gray
+        Write-Host "  │   └──[I] Windows IP Configuration" -ForegroundColor Gray
 		Write-Host "  │    " -ForegroundColor Green
         Write-Host "  └──────[X] Exit" -ForegroundColor Red
         Write-Host ""
@@ -588,6 +643,9 @@ function Main-Menu {
             "T" { DriverRestore }
             "C" { AutoShortcut }
             "F" { CheckDisk }
+            "M" { TempC }
+            "I" { IPConf }
+            "U" { EcMenu }
             "X" { Keluar }
             default { 
                 Write-Host "Wrong Selected!" -ForegroundColor Red
