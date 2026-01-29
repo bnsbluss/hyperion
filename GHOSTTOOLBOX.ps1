@@ -1,10 +1,11 @@
-﻿# ==========================================
+# ==========================================
 # AUTO INSTALLER SILENT MODE BY HYPERION
 # POWERSHELL FULL VERSION
 # ==========================================
 
 # ---------- BYPASS SECURITY POLICY ----------
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+
 
 # ---------- ADMIN CHECK ----------
 $IsAdmin = ([Security.Principal.WindowsPrincipal] `
@@ -32,6 +33,35 @@ if (-not $env:PS_NEW_WINDOW) {
 
     exit
 }
+
+$code = @"
+using System;
+using System.Runtime.InteropServices;
+
+public class WinAPI {
+    [DllImport("user32.dll")]
+    public static extern IntPtr GetSystemMenu(IntPtr hWnd, bool bRevert);
+
+    [DllImport("user32.dll")]
+    public static extern bool EnableMenuItem(IntPtr hMenu, uint uIDEnableItem, uint uEnable);
+
+    public const uint SC_CLOSE = 0xF060;
+    public const uint MF_BYCOMMAND = 0x00000000;
+    public const uint MF_GRAYED = 0x00000001;
+    public const uint MF_DISABLED = 0x00000002;
+}
+"@
+
+Add-Type -TypeDefinition $code
+
+# Mendapatkan handle jendela PowerShell yang sedang berjalan
+$hwnd = (Get-Process -Id $PID).MainWindowHandle
+
+if ($hwnd -ne [IntPtr]::Zero) {
+    $hMenu = [WinAPI]::GetSystemMenu($hwnd, $false)
+    # Menonaktifkan tombol Close (X)
+    [WinAPI]::EnableMenuItem($hMenu, [WinAPI]::SC_CLOSE, [WinAPI]::MF_BYCOMMAND -bor [WinAPI]::MF_GRAYED -bor [WinAPI]::MF_DISABLED)
+} 
 
 
 # ---------- BASE PATH (ANTI DRIVE CHANGE) ----------
@@ -358,32 +388,32 @@ function Open-DiskMgmt {
 
 function CheckDisk {
     Clear-Host
-    # 1. Menampilkan daftar drive yang tersedia agar user tidak bingung
     Write-Host "Checking Available Drive" -ForegroundColor Yellow
     Get-PSDrive -PSProvider FileSystem | Select-Object Name, @{n="Used(GB)";e={[math]::Round($_.Used/1GB,2)}}, @{n="Free(GB)";e={[math]::Round($_.Free/1GB,2)}} | Format-Table -AutoSize
 
-    # 2. Input Drive Letter dari user
     $drive = Read-Host "`nType the drive letter you want to check (Example: C or D)"
     
-    # Validasi jika input kosong
     if (-not $drive) {
         Write-Host "Error: Input cannot be empty!" -ForegroundColor Red
+        Start-Sleep -Seconds 2
         return
     }
 
-    # 3. Konfirmasi (Perbaikan error di baris ini)
-    # Gunakan $($drive) agar PowerShell tidak bingung dengan tanda titik dua
-    $confirm = Read-Host "Are you sure you want to run CHKDSK on $($drive): /f /r /x? (Y/N)"
+    $confirm = Read-Host "Are you sure you want to run CHKDSK on $($drive) ? (Y/N)"
     
     if ($confirm -eq 'Y' -or $confirm -eq 'y') {
         Clear-Host
-        Show-Loading "Initializing" 100
+        # Show-Loading "Initializing" 100 # Pastikan fungsi Show-Loading sudah kamu buat sebelumnya
         
-        # Eksekusi chkdsk
-        # Kita gunakan $($drive) lagi di sini untuk keamanan
-        chkdsk "$($drive):" /f /r /x
+        chkdsk "$($drive):" /f  
+        
+        # INI KUNCINYA: Menunggu user sebelum balik ke menu
+        Write-Host "`n--------------------------------------------------" -ForegroundColor Cyan
+        Write-Host "Process Finished. Press any key to return to menu..." -ForegroundColor Cyan
+        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     } else {
         Write-Host "Process canceled by user." -ForegroundColor Yellow
+        Start-Sleep -Seconds 2
     }
 }
 
@@ -489,6 +519,17 @@ function DriverRestore {
 
 function Keluar {
 	Clear-Host
+
+	$MF_ENABLED = 0x00000000
+	$SC_CLOSE = 0xF060
+
+	$hwnd = (Get-Process -Id $PID).MainWindowHandle
+
+	if ($hwnd -ne [IntPtr]::Zero) {
+		$hMenu = [WinAPI]::GetSystemMenu($hwnd, $false)
+		# Mengaktifkan kembali tombol Close (X)
+		[WinAPI]::EnableMenuItem($hMenu, $SC_CLOSE, $MF_ENABLED)
+}
 	reg add HKCU\Console /v QuickEdit /t REG_DWORD /d 1 /f | Out-Null
 	Show-Banner
 	Write-Host '[EXIT] You have exit from session ' -NoNewline -ForegroundColor Green
