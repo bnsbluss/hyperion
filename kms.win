@@ -84,7 +84,7 @@ if (-not $args) {
     }
 
     # Verify script integrity
-    $releaseHash = 'C731BB797994B7185944E8B6075646EBDC2CEF87960B4B2F437306CB4CE28F03'
+    $releaseHash = '78D84776C0296BC250A1F421B91374F1B4A79D9C930B8B3CCFCE842D6E4A96ED'
     $stream = New-Object IO.MemoryStream
     $writer = New-Object IO.StreamWriter $stream
     $writer.Write($response)
@@ -132,3 +132,4 @@ if (-not $args) {
     CheckFile $FilePath
     Remove-Item -Path $FilePath
 } @args
+
