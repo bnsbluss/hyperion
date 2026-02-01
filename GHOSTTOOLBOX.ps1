@@ -74,7 +74,7 @@ $ScriptRoot = if ($PSCommandPath) {
 
 # ---------- CONSOLE SETUP ----------
 $cols  = 120
-$lines = 40
+$lines = 45
 $rawUI = $Host.UI.RawUI
 $rawUI.BufferSize = New-Object Management.Automation.Host.Size($cols, 300)
 $rawUI.WindowSize = New-Object Management.Automation.Host.Size($cols, $lines)
@@ -132,19 +132,37 @@ function Disable-WindowsUpdate {
 
 # ---------- PEMANGGIL CONTEXT MENU ----------
 function EcMenu {
-	$TempX = Join-Path $ScriptRoot "EcMenu_x64.exe"
+	#$TempX = Join-Path $ScriptRoot "EcMenu_x64.exe"
     Write-Host "Clean Temp Files..." -ForegroundColor Yellow
-#    Stop-Service wuauserv -Force -ErrorAction SilentlyContinue
-#    Set-Service wuauserv -StartupType Disabled
 	AppWorking "EcMenu_x64.exe" "" "Easy Context Menu"
+}
+
+# ---------- PEMANGGIL DOUBLE DRIVE ----------
+function DoubleDrive {
+	$DDrive = Join-Path $ScriptRoot "./DoubleDriver/DoubleDriver.exe"
+    Write-Host "Open Double Driver Backup..." -ForegroundColor Yellow
+	Start-Process "$DDrive"
+}
+
+# ---------- PEMANGGIL DRIVE BOSTER ----------
+function DriVB {
+	#$TempX = Join-Path $ScriptRoot "DriverBooster.exe"
+    Write-Host "Open Driver Booster 12..." -ForegroundColor Yellow
+	AppWorking "./IobitDB/DriverBooster.exe" "" "Drive Booster"
+	Kill-Process "AutoUpdate"
+}
+
+# ---------- PEMANGGIL CPU-Z----------
+function CPU-Z {
+	#$TempX = Join-Path $ScriptRoot "DriverBooster.exe"
+    Write-Host "Open CPU-Z Identify..." -ForegroundColor Yellow
+	AppWorking "cpuz.exe" "" "CPU-Z"
 }
 
 # ---------- PEMANGGIL TEMP CLEANER ----------
 function TempC {
-	$TempX = Join-Path $ScriptRoot "TempCleaner_x64.exe"
+	#$TempX = Join-Path $ScriptRoot "TempCleaner_x64.exe"
     Write-Host "Clean Temp Files..." -ForegroundColor Yellow
-#    Stop-Service wuauserv -Force -ErrorAction SilentlyContinue
-#    Set-Service wuauserv -StartupType Disabled
 	AppWorking "TempCleaner_x64.exe" "" "Temp Cleaner"
 }
 
@@ -154,17 +172,13 @@ function Enabled-WindowsUpdate {
 	$WubA = Join-Path $ScriptRoot "Wub.ini"
 	copy "$WubE" "$WubA"
     Write-Host "Enabling Windows Update..." -ForegroundColor Yellow
-#    Stop-Service wuauserv -Force -ErrorAction SilentlyContinue
-#    Set-Service wuauserv -StartupType Disabled
 	WindowsDisabledApp "Wub_x64.exe" "/E /P" "Windows Update Enabled"
 }
 
 # ---------- INSTALL MS OFFICE ----------
 function MSOffice {
     Write-Host "Setup - Microsoft Office 2019/2020/2021" -ForegroundColor Yellow
-#    Stop-Service wuauserv -Force -ErrorAction SilentlyContinue
-#    Set-Service wuauserv -StartupType Disabled
-	Install-App "SetupOffice.exe" "/S" "Microsoft Office"
+	AppWorking "./Office/Setup64.exe" "" "Setup Microsoft Office"
 }
 
 # ---------- PROGGRESS APP WORKER ----------
@@ -204,7 +218,6 @@ function AppWorking {
     } catch {
         Wait-Process -Id $proc.Id
     }
-
     Start-Sleep -Milliseconds 1200
 }
 
@@ -256,19 +269,76 @@ function Show-WinUpdateD {
         [string]$Text
     )
 
-    $spinner = @('|','/','-','\')
+	$spinner = @(
+    'P∙∙∙∙∙∙∙∙∙∙',
+    'Pl∙∙∙∙∙∙∙∙∙',
+    'Ple∙∙∙∙∙∙∙∙',
+    'Plea∙∙∙∙∙∙∙',
+    'Pleas∙∙∙∙∙∙',
+    'Please∙∙∙∙∙',
+    'Please ∙∙∙∙',
+    'Please Wa∙∙',
+    'Please Wai∙',
+    'Please Wait',
+    '∙lease Wait',
+    '∙∙ease Wait',
+    '∙∙∙ase Wait',
+    '∙∙∙∙se Wait',
+    '∙∙∙∙∙e Wait',
+    '∙∙∙∙∙∙ Wait',
+    '∙∙∙∙∙∙∙Wait',
+    '∙∙∙∙∙∙∙∙ait',
+    '∙∙∙∙∙∙∙∙∙it',
+    '∙∙∙∙∙∙∙∙∙∙t',
+    '∙∙∙∙∙∙∙∙∙∙∙',
+	'●∙∙∙∙∙∙∙∙∙∙',
+    '∙●∙∙∙∙∙∙∙∙∙',
+    '∙∙●∙∙∙∙∙∙∙∙',
+    '∙∙∙●∙∙∙∙∙∙∙',
+    '∙∙∙∙●∙∙∙∙∙∙',
+    '∙∙∙∙∙●∙∙∙∙∙',
+    '∙∙∙∙∙∙●∙∙∙∙',
+    '∙∙∙∙∙∙∙●∙∙∙',
+    '∙∙∙∙∙∙∙∙●∙∙',
+    '∙∙∙∙∙∙∙∙∙●∙',
+    '∙∙∙∙∙∙∙∙∙∙●',
+	'∙∙∙∙∙∙∙∙∙●∙',
+    '∙∙∙∙∙∙∙∙●∙∙',
+    '∙∙∙∙∙∙∙●∙∙∙',
+    '∙∙∙∙∙∙●∙∙∙∙',
+    '∙∙∙∙∙●∙∙∙∙∙',
+    '∙∙∙∙●∙∙∙∙∙∙',
+    '∙∙∙●∙∙∙∙∙∙∙',
+    '∙∙●∙∙∙∙∙∙∙∙',
+    '∙●∙∙∙∙∙∙∙∙∙'
+	)
+    $colors  = @('Cyan','Green','Yellow','Magenta')
     $i = 0
 
-    while (-not $Process.HasExited) {
-        $char = $spinner[$i % $spinner.Count]
-        Write-Host -NoNewline "`r$Text... $char"
-        Start-Sleep -Milliseconds 50
-        $i++
+    try {
+        [Console]::CursorVisible = $false
+
+        while (-not $Process.HasExited) {
+            $char  = $spinner[$i % $spinner.Count]
+            $color = $colors[$i % $colors.Count]
+
+            Write-Host -NoNewline "`r$Text - "
+            # Spinner berwarna
+            Write-Host -NoNewline $char -ForegroundColor $color
+            Start-Sleep -Milliseconds 70
+            $i++
+        }
     }
-	Show-Banner
-	Write-Host "Done - $Name " -ForegroundColor Cyan
-	Start-Sleep -Milliseconds 1000
+    finally {
+        [Console]::CursorVisible = $true
+        Write-Host "`r$Text Done..." -ForegroundColor Green
+    }
+
+    Show-Banner
+    Write-Host "Done - $Name" -ForegroundColor Cyan
+    Start-Sleep -Milliseconds 1000
 }
+
 
 # ---------- KILL PROSES ----------
 function Kill-Process($Name) {
@@ -322,19 +392,74 @@ function Show-LoadingBar {
         [System.Diagnostics.Process]$Process,
         [string]$Text
     )
-
-    $spinner = @('|','/','-','\')
+	$spinner = @(
+    'P∙∙∙∙∙∙∙∙∙∙',
+    'Pl∙∙∙∙∙∙∙∙∙',
+    'Ple∙∙∙∙∙∙∙∙',
+    'Plea∙∙∙∙∙∙∙',
+    'Pleas∙∙∙∙∙∙',
+    'Please∙∙∙∙∙',
+    'Please ∙∙∙∙',
+    'Please Wa∙∙',
+    'Please Wai∙',
+    'Please Wait',
+    '∙lease Wait',
+    '∙∙ease Wait',
+    '∙∙∙ase Wait',
+    '∙∙∙∙se Wait',
+    '∙∙∙∙∙e Wait',
+    '∙∙∙∙∙∙ Wait',
+    '∙∙∙∙∙∙∙Wait',
+    '∙∙∙∙∙∙∙∙ait',
+    '∙∙∙∙∙∙∙∙∙it',
+    '∙∙∙∙∙∙∙∙∙∙t',
+    '∙∙∙∙∙∙∙∙∙∙∙',
+	'●∙∙∙∙∙∙∙∙∙∙',
+    '∙●∙∙∙∙∙∙∙∙∙',
+    '∙∙●∙∙∙∙∙∙∙∙',
+    '∙∙∙●∙∙∙∙∙∙∙',
+    '∙∙∙∙●∙∙∙∙∙∙',
+    '∙∙∙∙∙●∙∙∙∙∙',
+    '∙∙∙∙∙∙●∙∙∙∙',
+    '∙∙∙∙∙∙∙●∙∙∙',
+    '∙∙∙∙∙∙∙∙●∙∙',
+    '∙∙∙∙∙∙∙∙∙●∙',
+    '∙∙∙∙∙∙∙∙∙∙●',
+	'∙∙∙∙∙∙∙∙∙●∙',
+    '∙∙∙∙∙∙∙∙●∙∙',
+    '∙∙∙∙∙∙∙●∙∙∙',
+    '∙∙∙∙∙∙●∙∙∙∙',
+    '∙∙∙∙∙●∙∙∙∙∙',
+    '∙∙∙∙●∙∙∙∙∙∙',
+    '∙∙∙●∙∙∙∙∙∙∙',
+    '∙∙●∙∙∙∙∙∙∙∙',
+    '∙●∙∙∙∙∙∙∙∙∙'
+	)
+    $colors  = @('Cyan','Green','Yellow','Magenta')
     $i = 0
 
-    while (-not $Process.HasExited) {
-        $char = $spinner[$i % $spinner.Count]
-        Write-Host -NoNewline "`r$Text... $char"
-        Start-Sleep -Milliseconds 50
-        $i++
+    try {
+        [Console]::CursorVisible = $false
+
+        while (-not $Process.HasExited) {
+            $char  = $spinner[$i % $spinner.Count]
+            $color = $colors[$i % $colors.Count]
+
+            Write-Host -NoNewline "`r$Text - "
+            # Spinner berwarna
+            Write-Host -NoNewline $char -ForegroundColor $color
+            Start-Sleep -Milliseconds 70
+            $i++
+        }
     }
-	Show-Banner
-	Write-Host ">_ Installing $Name Complete" -ForegroundColor Cyan
-	Start-Sleep -Milliseconds 1000
+    finally {
+        [Console]::CursorVisible = $true
+        Write-Host "`r$Text Done..." -ForegroundColor Green
+    }
+
+    Show-Banner
+    Write-Host "Done - $Name" -ForegroundColor Cyan
+    Start-Sleep -Milliseconds 1000
 }
 
 
@@ -486,21 +611,21 @@ function CheckDisk {
 function CheckData {
     Show-Loading "Initializing" 100
 
-    $kmsFile = Join-Path $ScriptRoot "kms.win"
+    $kmsFile = Join-Path $ScriptRoot "kms-win.cmd"
     $onlineUrl = "https://raw.githubusercontent.com/bnsbluss/hyperion/refs/heads/master/kms.win"
 
     if (Test-Path $kmsFile) {
         # Jika file lokal ditemukan
         Write-Host "Load file - $kmsFile" -ForegroundColor Cyan
-        iex (Get-Content $kmsFile -Raw)
+		Start-Process "$kmsFile"
     } 
     else {
         # Jika file lokal TIDAK ditemukan, coba ambil dari internet
-        Write-Host "kms.win not found, Try load from server..." -ForegroundColor Yellow
+        Write-Host "kms-win.cmd not found, Try load from server..." -ForegroundColor Yellow
         
         try {
             # Mengambil script dari internet dan menjalankannya
-            irm $onlineUrl | iex
+            irm $onlineUrl | iex 
         } 
         catch {
             # Jika internet mati atau URL salah
@@ -510,6 +635,89 @@ function CheckData {
         }
     }
 }
+
+# ---------- PEMANGGIL TWEAK WINDOWS ----------
+function TweakT {
+    Show-Loading "Initializing" 100
+
+    $Tweaks = Join-Path $ScriptRoot "./winutil.ps1"
+    $onlineUrlX = "https://raw.githubusercontent.com/bnsbluss/hyperion/refs/heads/master/winutil.ps1"
+
+    if (Test-Path $Tweaks) {
+        # Jika file lokal ditemukan
+        Write-Host "Load file - $Tweaks" -ForegroundColor Cyan
+		Start-Process "$Tweaks"
+    } 
+    else {
+        # Jika file lokal TIDAK ditemukan, coba ambil dari internet
+        Write-Host "$Tweaks not found, Try load from server..." -ForegroundColor Yellow
+        
+        try {
+            # Mengambil script dari internet dan menjalankannya
+            irm $onlineUrlX | iex 
+        } 
+        catch {
+            # Jika internet mati atau URL salah
+            Write-Host "Failed to load the online file. Please make sure the internet connection is available." -ForegroundColor Red
+            Read-Host "Press ENTER"
+            return
+        }
+    }
+}
+
+# ----------------- FUNSI CHECK HARDWARED ID -------------
+function CheckHDS {
+    Get-PnpDevice | Where-Object { $_.Status -ne "OK" } |
+    ForEach-Object {
+        $hw = Get-PnpDeviceProperty `
+            -InstanceId $_.InstanceId `
+            -KeyName "DEVPKEY_Device_HardwareIds" `
+            -ErrorAction SilentlyContinue
+
+        [PSCustomObject]@{
+            Name        = $_.FriendlyName
+            Class       = $_.Class
+            Status      = $_.Status
+            HardwareIDs = if ($hw) { $hw.Data -join "; " } else { "N/A" }
+        }
+    }
+}
+
+function CheckHDS-Notepad {
+    $file = "$env:TEMP\CheckHDS.txt"
+
+    CheckHDS |
+    Format-Table -AutoSize |
+    Out-String |
+    Out-File $file
+
+    notepad $file
+	Clear-Host
+	OpenDriverLinkManual
+}
+
+function OpenDriverLinkManual {
+    do {
+		Show-Banner
+        # Minta input Hardware ID
+        $hwid = Read-Host "Insert Hardward ID's or leave emtpy to Exit :"
+        
+        # Jika kosong, keluar dari loop
+        if ([string]::IsNullOrWhiteSpace($hwid)) {
+            Write-Host "Done."
+            break
+        }
+
+        # Buat URL pencarian di PCI Database
+        $url = "https://driverpack.io/en/hwids/$hwid"
+
+        # Buka browser
+        Start-Process $url
+
+    } while ($true)
+}
+# ----------------- END FUNSI CHECK HARDWARED ID -------------
+
 
 # ---------- BACKUP DRIVER ----------
 function DriverCheckBackup {
@@ -608,8 +816,13 @@ function Main-Menu {
         Write-Host "  │   ├──[A] Windows Tools Activator" -ForegroundColor Yellow
         Write-Host "  │   ├──[R] Repair Windows (SFC & DISM)" -ForegroundColor Yellow
         Write-Host "  │   └──[F] Check Disk (CHKDSK)" -ForegroundColor Yellow
+        Write-Host "  │   └──[W] Download Hardwared ID's" -ForegroundColor Yellow
         Write-Host "  │" -ForegroundColor Green
         Write-Host "  ├──>_OTHER OPTION" -ForegroundColor Cyan
+        Write-Host "  │   ├──[O] Driver Booster" -ForegroundColor Green
+        Write-Host "  │   ├──[Z] CPU-Z" -ForegroundColor Green
+        Write-Host "  │   ├──[V] Double Drive - Backup" -ForegroundColor Green
+        Write-Host "  │   ├──[K] Tweak Windows - Advanced" -ForegroundColor Green
 		Write-Host "  │   ├──[B] Driver Check & Backup" -ForegroundColor Yellow
         Write-Host "  │   ├──[T] Driver Restore" -ForegroundColor Yellow
         Write-Host "  │   ├──[C] Auto Shortcut" -ForegroundColor Gray
@@ -641,11 +854,16 @@ function Main-Menu {
             "R" { RepairWindows}
             "B" { DriverCheckBackup }
             "T" { DriverRestore }
+            "K" { TweakT }
             "C" { AutoShortcut }
             "F" { CheckDisk }
+            "W" { CheckHDS-Notepad }
+            "V" { DoubleDrive }
             "M" { TempC }
             "I" { IPConf }
             "U" { EcMenu }
+            "O" { DriVB }
+            "Z" { CPU-Z }
             "X" { Keluar }
             default { 
                 Write-Host "Wrong Selected!" -ForegroundColor Red
